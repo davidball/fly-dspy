@@ -1,0 +1,32 @@
+<!doctype html>
+<html>
+    <head>
+        <title>FlyDSPie</title>
+    </head>
+    <body>
+        <h1>DSPy on Fly.io with Persistent SQLite</h1>
+        <form method="post">
+            <textarea
+                name="question"
+                rows="4"
+                cols="50"
+                placeholder="Ask anything..."
+            ></textarea
+            ><br />
+            <button type="submit">Submit</button>
+        </form>
+
+        {% if question %}
+        <h2>You asked: {{ question }}</h2>
+        <p><strong>Answer:</strong> {{ result }}</p>
+        {% endif %}
+
+        <hr />
+        <small
+            >Queries are saved to persistent SQLite on Fly volume.<a
+                href="/history"
+                >Full History</a
+            ></small
+        >
+    </body>
+</html>
