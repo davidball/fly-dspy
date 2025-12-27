@@ -2,8 +2,9 @@ import os
 import sqlite3
 
 import dspy
-from fastapi import FastAPI, Form, Request
+from fastapi import FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse
+from pydantic import BaseModel
 from fastapi.templating import Jinja2Templates
 
 from models import grok, openai, venice
@@ -53,8 +54,14 @@ class BasicQA(dspy.Signature):
 
 qa = dspy.Predict(BasicQA)
 
-# SQLite setup on persistent volume
-DB_PATH = os.getenv("DATABASE_PATH", "/data/app.db")
+# SQLite setup - auto-detect environment
+if os.getenv("DATABASE_PATH"):
+    DB_PATH = os.getenv("DATABASE_PATH")
+elif os.path.isdir("/data"):
+    DB_PATH = "/data/app.db"
+else:
+    DB_PATH = "./local_data/app.db"
+    os.makedirs("./local_data", exist_ok=True)
 
 
 def init_db():
@@ -127,3 +134,36 @@ async def history(request: Request):
 @app.get("/health")
 def health():
     return {"status": "ok"}
+
+
+class AskRequest(BaseModel):
+    question: str
+
+
+class AskResponse(BaseModel):
+    question: str
+    answer: str
+
+
+@app.post("/api/ask", response_model=AskResponse)
+async def api_ask(req: AskRequest):
+    if not lm:
+        raise HTTPException(status_code=503, detail="No LLM API key configured")
+
+    pred = qa(question=req.question)
+    answer = pred.answer
+
+    conn = sqlite3.connect(DB_PATH)
+    c = conn.cursor()
+    c.execute(
+        "INSERT INTO queries (question, answer) VALUES (?, ?)", (req.question, answer)
+    )
+    conn.commit()
+    conn.close()
+
+    if VERBOSE:
+        print("\n=== DSPy LM Call History (last 1) ===\n")
+        print(lm.inspect_history(n=1))
+        print("=====================================\n")
+
+    return AskResponse(question=req.question, answer=answer)

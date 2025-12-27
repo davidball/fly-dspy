@@ -16,7 +16,7 @@ cp fly.toml.example fly.toml
 Replace "REPLACE_WITH_YOUR_UNIQUE_APP_NAME" with a real, unique name (e.g., my-dspy-project-2025)
 
 
-### 2.Launch the App Skeleton
+### 2. Launch the App Skeleton
 ```
 fly launch --no-deploy
 ```
@@ -33,7 +33,7 @@ fly secrets set XAI_API_KEY=your_xai_key_here
 # For Venice.ai
 fly secrets set VENICE_API_KEY=your_venice_key_here
 
-# For OpenAI (fall  back)
+# For OpenAI (fallback)
 fly secrets set OPENAI_API_KEY=sk-...
 ```
 
@@ -53,6 +53,27 @@ Visit /history to see saved queries (proves persistence works).
 # Extending the App
 Everything lives in main.py and models.py.
 Replace the simple QA signature with your own pipeline.
+
+## JSON API
+
+Call your pipeline programmatically from anywhere:
+
+```bash
+# Local development
+curl -X POST http://localhost:8080/api/ask -H "Content-Type: application/json" -d '{"question": "What is DSPy?"}'
+
+# Production (Fly.io)
+curl -X POST https://your-app.fly.dev/api/ask \
+  -H "Content-Type: application/json" \
+  -d '{"question": "What is DSPy?"}'
+```
+
+Response:
+```json
+{"question": "What is DSPy?", "answer": "..."}
+```
+
+This lets you deploy a DSPy pipeline once and call it from scripts, other apps, or workflows.
 
 
 

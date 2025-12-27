@@ -37,7 +37,7 @@ def openai(model_name):
 
 
 def ollama(model_name):
-    return dspy.LM(model="ollama/")
+    return dspy.LM(model=f"ollama/{model_name}")
 
 
 def lms(model_name):
