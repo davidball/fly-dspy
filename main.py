@@ -7,16 +7,42 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from models import grok_code_fast, venice_uncensored
-
-lm = venice_uncensored
+from models import grok, venice
 
 VERBOSE = True
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
 
-dspy.settings.configure(lm=lm)
+from models import grok, venice  # keep your model factory
+
+# Try to configure LM — fall back to None if no keys
+lm = None
+missing_key_message = None
+
+openai_key = os.getenv("OPENAI_API_KEY")
+xai_key = os.getenv("XAI_API_KEY")
+venice_key = os.getenv("VENICE_API_KEY")
+
+if xai_key:
+    lm = grok("grok-4-1-fast-reasoning")  # or whatever default
+elif venice_key:
+    lm = venice("venice-uncensored")
+elif openai_key:
+    lm = dspy.OpenAI(model="gpt-4o-mini")
+else:
+    missing_key_message = (
+        "No LLM API key configured. Set one of these secrets in Fly dashboard or CLI:<br><br>"
+        "<code>fly secrets set XAI_API_KEY=...</code><br>"
+        "<code>fly secrets set VENICE_API_KEY=...</code><br>"
+        "<code>fly secrets set OPENAI_API_KEY=sk-...</code><br><br>"
+        "The app works fine otherwise — try /history to see persistent storage!"
+    )
+
+print("well what is lm?", lm)
+
+if lm:
+    dspy.settings.configure(lm=lm)
 
 
 class BasicQA(dspy.Signature):
@@ -53,6 +79,15 @@ async def home(request: Request):
 
 @app.post("/", response_class=HTMLResponse)
 async def ask(request: Request, question: str = Form(...)):
+    if not lm:
+        return templates.get_template("index.html").render(
+            {
+                "request": request,
+                "question": question,
+                "result": None,
+                "error": missing_key_message,
+            }
+        )
     pred = qa(question=question)
     answer = pred.answer
 

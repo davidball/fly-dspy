@@ -1,51 +1,57 @@
 <!doctype html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <title>History - FlyDSPie</title>
-        <style>
-            body {
-                font-family: system-ui, sans-serif;
-                max-width: 800px;
-                margin: 40px auto;
-                padding: 20px;
-            }
-            table {
-                width: 100%;
-                border-collapse: collapse;
-                margin-top: 20px;
-            }
-            th,
-            td {
-                border: 1px solid #ccc;
-                padding: 10px;
-                text-align: left;
-                vertical-align: top;
-            }
-            th {
-                background: #f0f0f0;
-            }
-        </style>
-    </head>
-    <body>
-        <h1>Query History</h1>
-        <p><a href="/">← Back to ask</a></p>
 
-        {% if history %}
-        <table>
-            <tr>
-                <th>Question</th>
-                <th>Answer</th>
-            </tr>
-            {% for q, a in history %}
-            <tr>
-                <td>{{ q }}</td>
-                <td>{{ a }}</td>
-            </tr>
-            {% endfor %}
-        </table>
-        {% else %}
-        <p>No history yet. <a href="/">Ask something</a> first!</p>
-        {% endif %}
-    </body>
+<head>
+    <meta charset="UTF-8" />
+    <title>History - FlyDSPie</title>
+    <style>
+        body {
+            font-family: system-ui, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 20px;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 20px;
+        }
+
+        th,
+        td {
+            border: 1px solid #ccc;
+            padding: 10px;
+            text-align: left;
+            vertical-align: top;
+        }
+
+        th {
+            background: #f0f0f0;
+        }
+    </style>
+</head>
+
+<body>
+    <h1>Query History</h1>
+    <p><a href="/">← Back to ask</a></p>
+
+    {% if history %}
+    <table>
+        <tr>
+            <th>Question</th>
+            <th>Answer</th>
+        </tr>
+        {% for q, a in history %}
+        <tr>
+            <td>{{ q }}</td>
+            <td>{{ a }}</td>
+        </tr>
+        {% endfor %}
+    </table>
+    {% else %}
+    <p>No history yet. <a href="/">Ask something</a> first!</p>
+    {% endif %}
+</body>
+
 </html>

@@ -5,9 +5,9 @@ Template to start a new project hosted on fly.io using DSPy and a SQLite databas
 Install [flyctl](https://fly.io/docs/flyctl/install/).
 
 
-Clone this repo.
+After cloning this repo:
 
-### Create Your fly.toml
+### 1. Create Your fly.toml
 
 ```bash
 cp fly.toml.example fly.toml
@@ -16,14 +16,16 @@ cp fly.toml.example fly.toml
 Replace "REPLACE_WITH_YOUR_UNIQUE_APP_NAME" with a real, unique name (e.g., my-dspy-project-2025)
 
 
-run `flyctl launch`
+### 2.Fly launch
+Run `fly launch --no-deploy`
 
 
-### Setting API Keys (Secrets)
+
+### 3. Setting API Keys (Secrets)
 
 You need at least one API key for the language model (OpenAI, Grok, Venice, etc.).
 
-#### Recommended: One-line CLI commands (copy-paste these)
+#### Sample One-line CLI commands
 
 ```bash
 # For Grok (xAI)
@@ -36,6 +38,16 @@ fly secrets set VENICE_API_KEY=your_venice_key_here
 fly secrets set OPENAI_API_KEY=sk-...
 
 ```
+
+#### Deploy for real
+
+`fly deploy`
+
+# Making Something New
+This template is intended to be simply an easy way to get started very quickly with a cheaply hosted DSPy pipeline. 
+
+All the basic routes and simplistic DSPy model are in main.py waiting for you to extend.
+
 
 ### Test the full Docker image locally (optional but recommended)
 
@@ -61,12 +73,14 @@ uv run uvicorn main:app --host 0.0.0.0 --port 8080
 ```
 
 
-
-
-### Set Up Persistent Volume (Required ONCE per app)
+### Persistent Volume
   
-  The app uses a Fly volume for persistent SQLite storage at `/data/app.db`.
+The app uses a Fly volume for persistent SQLite storage at `/data/app.db`.
   
-  Run this **once** (after your first `fly launch`):
+Currently the fly launch command will set this up for you automatically based on the default in fly.toml.example. 
+
+If you prefer to create a volume yourself here is a sample command.
+
   ```bash
   fly volumes create data --region ord --size 1
+```
