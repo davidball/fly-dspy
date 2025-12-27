@@ -4,18 +4,35 @@ import dspy
 
 
 def venice(model_name):
+    key = os.getenv("VENICE_API_KEY")
+    if not key:
+        return None
     return dspy.LM(
         model=f"openai/{model_name}",
         api_base="https://api.venice.ai/api/v1",
-        api_key=os.environ["VENICE_API_KEY"],
+        api_key=key,
     )
 
 
 def grok(model_name):
+    key = os.getenv("XAI_API_KEY")
+    if not key:
+        return None
     return dspy.LM(
         model=f"openai/{model_name}",
         api_base="https://api.x.ai/v1",
-        api_key=os.environ["XAI_API_KEY"],
+        api_key=key,
+    )
+
+
+def openai(model_name):
+    key = os.getenv("OPENAI_API_KEY")
+    if not key:
+        return None
+    return dspy.LM(
+        model=f"openai/{model_name}",
+        api_base="https://api.openai.com/v1",
+        api_key=key,
     )
 
 

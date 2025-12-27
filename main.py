@@ -1,4 +1,3 @@
-import logging
 import os
 import sqlite3
 
@@ -7,14 +6,12 @@ from fastapi import FastAPI, Form, Request
 from fastapi.responses import HTMLResponse
 from fastapi.templating import Jinja2Templates
 
-from models import grok, venice
+from models import grok, openai, venice
 
 VERBOSE = True
 
 app = FastAPI()
 templates = Jinja2Templates(directory="templates")
-
-from models import grok, venice  # keep your model factory
 
 # Try to configure LM — fall back to None if no keys
 lm = None
@@ -29,7 +26,7 @@ if xai_key:
 elif venice_key:
     lm = venice("venice-uncensored")
 elif openai_key:
-    lm = dspy.OpenAI(model="gpt-4o-mini")
+    lm = openai("gpt-4o-mini")
 else:
     missing_key_message = (
         "No LLM API key configured. Set one of these secrets in Fly dashboard or CLI:<br><br>"
@@ -39,10 +36,12 @@ else:
         "The app works fine otherwise — try /history to see persistent storage!"
     )
 
-print("well what is lm?", lm)
-
 if lm:
     dspy.settings.configure(lm=lm)
+else:
+    print(
+        "No llm configured.  Need one of the following envs: XAI_API_KEY, VENICE_API_KEY, OPENAI_API_KEY"
+    )
 
 
 class BasicQA(dspy.Signature):
@@ -61,8 +60,10 @@ DB_PATH = os.getenv("DATABASE_PATH", "/data/app.db")
 def init_db():
     conn = sqlite3.connect(DB_PATH)
     c = conn.cursor()
-    c.execute("""CREATE TABLE IF NOT EXISTS queries
-                 (id INTEGER PRIMARY KEY, question TEXT, answer TEXT)""")
+    c.execute(
+        """CREATE TABLE IF NOT EXISTS queries
+                 (id INTEGER PRIMARY KEY, question TEXT, answer TEXT)"""
+    )
     conn.commit()
     conn.close()
 
